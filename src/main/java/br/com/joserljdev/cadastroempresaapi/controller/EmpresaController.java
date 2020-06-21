@@ -24,6 +24,10 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import br.com.joserljdev.cadastroempresaapi.domain.Empresa;
 import br.com.joserljdev.cadastroempresaapi.domain.Endereco;
+import br.com.joserljdev.cadastroempresaapi.domain.Tipo;
+import br.com.joserljdev.cadastroempresaapi.repository.EmpresaRepository;
+import br.com.joserljdev.cadastroempresaapi.repository.StatusTipoRepository;
+import br.com.joserljdev.cadastroempresaapi.repository.filter.EmpresaFilter;
 import br.com.joserljdev.cadastroempresaapi.service.EmpresaService;
 
 @CrossOrigin("*")
@@ -34,9 +38,15 @@ public class EmpresaController {
 	@Autowired
 	private EmpresaService empresaService;
 
+	@Autowired
+	private EmpresaRepository empresaRepository;
+
+	@Autowired
+	private StatusTipoRepository statusTipoRepository;
+
 	@GetMapping
-	public ResponseEntity<List<Empresa>> listarTodos() {
-		return ResponseEntity.ok(empresaService.listar());
+	public List<Empresa> buscar(EmpresaFilter empresaFilter) {
+		return empresaRepository.filtrar(empresaFilter);
 	}
 
 	@GetMapping("/{codigo}")
@@ -72,7 +82,7 @@ public class EmpresaController {
 		empresaService.deletar(codigo);
 		return ResponseEntity.noContent().build();
 	}
-	
+
 	@GetMapping(value = "/endereco/{cep}")
 	public ResponseEntity<Endereco> buscarEnderecoPeloCep(@PathVariable(name = "cep") String cep) {
 		RestTemplate restTemplate = new RestTemplate();
@@ -85,5 +95,10 @@ public class EmpresaController {
 		Endereco endereco = restTemplate.getForObject(uri, Endereco.class, params);
 
 		return new ResponseEntity<Endereco>(endereco, HttpStatus.OK);
+	}
+
+	@GetMapping("/tipos")
+	public List<Tipo> listarTipos() {
+		return statusTipoRepository.findAll();
 	}
 }
